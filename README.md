@@ -2,7 +2,7 @@
 WeMos ESP8266 Arduino sketch to control pins and WS2812 led strips.
 
 This is the sketch to the corresponding tutorial video:
-..link here..
+https://www.youtube.com/watch?v=7Dv70ci-MOw
 
 TODOs:
 - fading jumps to taget state when called while prevoius fading still active
