@@ -4,7 +4,7 @@ by bitluni 2016
 https://creativecommons.org/licenses/by/4.0/
 Attribution means you can use it however you like as long you
 mention that it's base on my stuff.
-I'll be pleased if you'd do it ba sharing http://youtube.com/bitlunislab
+I'll be pleased if you'd do it by sharing http://youtube.com/bitlunislab
 */
 
 #include <ESP8266WebServer.h>

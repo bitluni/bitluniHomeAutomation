@@ -4,7 +4,7 @@ by bitluni 2016
 https://creativecommons.org/licenses/by/4.0/
 Attribution means you can use it however you like as long you
 mention that it's base on my stuff.
-I'll be pleased if you'd do it ba sharing http://youtube.com/bitlunislab
+I'll be pleased if you'd do it by sharing http://youtube.com/bitlunislab
 */
 
 #include <ESP8266WiFi.h>
@@ -20,9 +20,10 @@ I'll be pleased if you'd do it ba sharing http://youtube.com/bitlunislab
 #include "RainbowFunction.h"
 #include "SimpleRGBFunction.h"
 #include "WaveFunction.h"
+#include "RF.h"
 
-const char* ssid = "....";
-const char* password = "....";
+const char* ssid = "...";
+const char* password = "...";
 
 ESP8266WebServer server(80);
 
@@ -45,8 +46,9 @@ void handleRoot() {
   message += "<a href='/setleds?r=32&g=64&b=32&fade=1000'>/setleds</a> sets LEDs to the color from arguments: r=<0..255> g=<0..255> b=<0..255><br>";
   message += "<a href='/ledsoff?fade=500'>/ledsoff</a> turns off LEDs<br>";
   message += "<a href='/setpins?D1=128&D2=256&D3=512'>/setpins</a> sets to any of the in arguments specified pins (D0..D8) to their PWM values (0..1023). To use them digital: 0=off, 1023=on<br>";
-  message += "<a href='/togglepins'>/togglepins</a> inverts all pin values form pins used before.<br><br>";
-  message += "All functions except togglepins support the argument 'fade' which specifies the milliseconds it takes to fade to the new specified state. ...nice blending ;-)<br>";
+  message += "<a href='/togglepins'>/togglepins</a> inverts all pin values form pins used before.<br>";
+  message += "<a href='/rf?D=6&id0=182&id1=182&channel=0&on=1'>/rf</a> sends a rf code from arguments: D=<0..8> id0=<0..255> id1=<0..255> channel=<1..7> on=<0..1><br><br>";
+  message += "All functions except togglepins and rf support the argument 'fade' which specifies the milliseconds it takes to fade to the new specified state. ...nice blending ;-)<br>";
   message += "<br>Syntax is as follows: http://&ltip>/&ltcommand>?&ltargument1>=&ltvalue1>&&ltargument2>=&ltvalue2>&...<br>";
   message += "You can click on each link to see an example.<br><br>";
   message += "have fun -<a href='http://youtube.com/bitlunislab'>bitluni</a></body></html>";
@@ -86,6 +88,32 @@ bool checkFadeAndSetLedFunction(LedFunction *f)
   }
   else
     currentLedStates.setFunction(f);  
+}
+
+void handleRf()
+{
+	const int pinNumbers[] = {D0, D1, D2, D3, D4, D5, D6, D7, D8};
+	const int RF_MICROS = 200;
+	int pin = getArgValue("D");
+	int id0 = getArgValue("id0");
+	int id1 = getArgValue("id1");
+	int ch = getArgValue("channel");
+	int on = getArgValue("on");
+	String out = "rf D";
+	out += pin;
+	out += " ";
+	out += id0;
+	out += " ";
+	out += id1;
+	out += " ";
+	out += ch;
+	out += " ";
+	out += on;
+	pinMode(pinNumbers[pin], OUTPUT);
+	for(int i = 0; i < 5; i++)
+		rfWriteCode(pinNumbers[pin], RF_MICROS, id0, id1, ch | (on > 0? 8: 0));
+	//if(pin == -1) return;
+	server.send(200, "text/plain", out);	
 }
 
 void setup(void){
@@ -158,10 +186,12 @@ void setup(void){
   });
 
   server.on("/pinsoff", [](){
-    server.send(200, "text/plain", "insoff");
+    server.send(200, "text/plain", "pinsoff");
     currentPinStates.setAllTo(0);
     currentPinStates.commit();
   });
+
+  server.on("/rf", handleRf);
   
   server.onNotFound(handleNotFound);
 
