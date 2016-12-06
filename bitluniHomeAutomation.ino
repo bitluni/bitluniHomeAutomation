@@ -30,6 +30,8 @@ ESP8266WebServer server(80);
 const int LED_PIN = D4;
 const int LED_COUNT = 300;
 
+const int RF_OSC = 200;
+
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 LedStates currentLedStates(strip);
@@ -47,7 +49,7 @@ void handleRoot() {
   message += "<a href='/ledsoff?fade=500'>/ledsoff</a> turns off LEDs<br>";
   message += "<a href='/setpins?D1=128&D2=256&D3=512'>/setpins</a> sets to any of the in arguments specified pins (D0..D8) to their PWM values (0..1023). To use them digital: 0=off, 1023=on<br>";
   message += "<a href='/togglepins'>/togglepins</a> inverts all pin values form pins used before.<br>";
-  message += "<a href='/rf?D=6&id0=182&id1=182&channel=0&on=1'>/rf</a> sends a rf code from arguments: D=<0..8> id0=<0..255> id1=<0..255> channel=<1..7> on=<0..1><br><br>";
+  message += "<a href='/rf?D=6&t=200&id=28013&channel=0&on=1'>/rf</a> sends a rf code from arguments: D=<0..8> t=<0..1000> id=<0..1048575> channel=<0..2> on=<0..1>. Dx is the pin, t is the optional signal clock(default is 200, works for me)<br><br>";
   message += "All functions except togglepins and rf support the argument 'fade' which specifies the milliseconds it takes to fade to the new specified state. ...nice blending ;-)<br>";
   message += "<br>Syntax is as follows: http://&ltip>/&ltcommand>?&ltargument1>=&ltvalue1>&&ltargument2>=&ltvalue2>&...<br>";
   message += "You can click on each link to see an example.<br><br>";
@@ -93,26 +95,25 @@ bool checkFadeAndSetLedFunction(LedFunction *f)
 void handleRf()
 {
 	const int pinNumbers[] = {D0, D1, D2, D3, D4, D5, D6, D7, D8};
-	const int RF_MICROS = 200;
 	int pin = getArgValue("D");
-	int id0 = getArgValue("id0");
-	int id1 = getArgValue("id1");
+	int t = getArgValue("t");
+	if(t == -1) t = RF_OSC;
+	int id = getArgValue("id");
 	int ch = getArgValue("channel");
 	int on = getArgValue("on");
 	String out = "rf D";
 	out += pin;
 	out += " ";
-	out += id0;
+	out += t;
 	out += " ";
-	out += id1;
+	out += id;
 	out += " ";
 	out += ch;
 	out += " ";
 	out += on;
 	pinMode(pinNumbers[pin], OUTPUT);
 	for(int i = 0; i < 5; i++)
-		rfWriteCode(pinNumbers[pin], RF_MICROS, id0, id1, ch | (on > 0? 8: 0));
-	//if(pin == -1) return;
+		rfWriteCode(pinNumbers[pin], t, id, (1 << (ch + 1)) | (on > 0? 1: 0));
 	server.send(200, "text/plain", out);	
 }
 
