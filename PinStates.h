@@ -9,6 +9,20 @@ I'll be pleased if you'd do it by sharing http://youtube.com/bitlunislab
 
 #include <ESP8266WebServer.h>
 
+//If you encounter compile error in this file 
+//you have to select the board WeMos D1 R2 Mini in the tools
+//If you are using this code elswhere use the wemos D1 mini pin configuration
+//from this comment
+/*const int D0 = 16;
+const int D1 = 5;
+const int D2 = 4;
+const int D3 = 0;
+const int D4 = 2;
+const int D5 = 14;
+const int D6 = 12;
+const int D7 = 13;
+const int D8 = 15;*/
+
 const int PIN_COUNT = 9;
 const char *pinNames[PIN_COUNT] = {"D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8"};
 const int pinNumbers[PIN_COUNT] = {D0, D1, D2, D3, D4, D5, D6, D7, D8};
